@@ -30,7 +30,7 @@ protected:
 
 public:
 	int m_key;
-	unsigned int techBoxled;
+	unsigned int techBox;
 	afx_msg LRESULT OnTeachBoxKeyHandler(WPARAM,LPARAM);
 	void AddSystrayIcon(void);
 	void DelSystrayIcon(void);

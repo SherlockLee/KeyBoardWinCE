@@ -286,10 +286,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\modbus\functions\mbfuncdiag.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\modbus\functions\mbfuncdisc.cpp"
 					>
 				</File>

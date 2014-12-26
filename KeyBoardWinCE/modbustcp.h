@@ -11,7 +11,7 @@
 #define REG_HOLDING_NREGS 100
 
 // 02 Read Input Status
-#define INPUT_STATUS_START	0
+#define INPUT_STATUS_START	100
 #define INPUT_STATUS_NREGS	100
 
 // 01 Read Coil Status
