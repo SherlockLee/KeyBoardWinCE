@@ -6,6 +6,9 @@
 #include "KeyBoardWinCE.h"
 #include "KeyBoardWinCEDlg.h"
 
+#include <ShellAPI.h>
+
+#include "SetIpAddressDlg.h"
 #include "modbustcp.h"
 
 #include "TechBoxLib.h"
@@ -16,7 +19,7 @@
 #endif
 
 NOTIFYICONDATA  KeyBoardND;
-
+SHELLEXECUTEINFO OpenFTPClient;
 
 //////////////////////////////////////////////////////////////////////////
 // Modbus TCP用到的全局变量
@@ -60,6 +63,8 @@ BEGIN_MESSAGE_MAP(CKeyBoardWinCEDlg, CDialog)
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BUTTON_MIN, &CKeyBoardWinCEDlg::OnBnClickedButtonMin)
 	ON_WM_TIMER()
+	ON_BN_CLICKED(IDC_BUTTON_SET_IPADDRESS, &CKeyBoardWinCEDlg::OnBnClickedButtonSetIpaddress)
+	ON_BN_CLICKED(IDC_BUTTON_OPEN_FTP_TOOL, &CKeyBoardWinCEDlg::OnBnClickedButtonOpenFtpTool)
 END_MESSAGE_MAP()
 
 
@@ -84,16 +89,6 @@ BOOL CKeyBoardWinCEDlg::OnInitDialog()
 
 	}	
 	AddSystrayIcon();
-	//::SetWindowPos(this->m_hWnd, HWND_NOTOPMOST, 100, 100, 300, 300, SWP_HIDEWINDOW|SWP_NOACTIVATE);
-	SetTimer(1, 1, NULL);
-	SetTimer(2, 5, NULL);
-
-	//////////////////////////////////////////////////////////////////////////
-	// 开启Modbus 主站
-	//////////////////////////////////////////////////////////////////////////
-	StartModbusTcp();
-	//////////////////////////////////////////////////////////////////////////
-
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -219,7 +214,7 @@ LRESULT CKeyBoardWinCEDlg::OnTeachBoxKeyHandler(WPARAM w,LPARAM l)  //w:key1  l:
 			 ucInputStatusBuf[3] = 0;
 			 ucInputStatusBuf[6] = 0;
 			break;
-		case TEACHBOX_KEY9:	// 修改116的值为1
+		case TEACHBOX_KEY9:		// 修改116的值为1
 			 ucInputStatusBuf[2] = 1;
 			 ucInputStatusBuf[7] = 0;
 			 ucInputStatusBuf[0] = 0;
@@ -406,13 +401,22 @@ LRESULT CKeyBoardWinCEDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lParam
 void CKeyBoardWinCEDlg::OnDestroy()
 {
 	CDialog::OnDestroy();
-	DelSystrayIcon( );
+	DelSystrayIcon();
 
 	//////////////////////////////////////////////////////////////////////////
 	// 停止Modbus 主站
 	//////////////////////////////////////////////////////////////////////////
-	StopModbusTcp();
+	if ((GetModbusState() == MB_RUNNING) || (GetModbusState() == MB_SHUTDOWN))
+	{
+		StopModbusTcp();
+	}	
 	//////////////////////////////////////////////////////////////////////////
+
+	if( OpenFTPClient.hProcess != NULL)
+	{ 
+		TerminateProcess(OpenFTPClient.hProcess, 0);
+		OpenFTPClient.hProcess = NULL;
+	}
 }
 
 void CKeyBoardWinCEDlg::OnBnClickedButtonMin()
@@ -429,7 +433,7 @@ void CKeyBoardWinCEDlg::OnBnClickedButtonMin()
 	}
 	this->ShowWindow(SW_MINIMIZE);
 #endif	
-	::SetWindowPos(this->m_hWnd, HWND_NOTOPMOST, 0, 0, 210, 60, SWP_HIDEWINDOW|SWP_NOACTIVATE);
+	::SetWindowPos(this->m_hWnd, HWND_NOTOPMOST, 0, 0, 210, 80, SWP_HIDEWINDOW|SWP_NOACTIVATE);
 	//::SetWindowPos(this->m_hWnd, HWND_NOTOPMOST, 0, 0, 500, 500, SWP_HIDEWINDOW|SWP_NOACTIVATE);
 }
 
@@ -439,7 +443,7 @@ void CKeyBoardWinCEDlg::OnTimer(UINT_PTR nIDEvent)
 	switch(nIDEvent)
 	{
 	case 1:
-		::SetWindowPos(this->m_hWnd, HWND_NOTOPMOST, 0, 0, 210, 60, SWP_HIDEWINDOW|SWP_NOACTIVATE);
+		::SetWindowPos(this->m_hWnd, HWND_NOTOPMOST, 0, 0, 210, 80, SWP_HIDEWINDOW|SWP_NOACTIVATE);
 		KillTimer(1);
 		break;
 	case 2:
@@ -499,3 +503,38 @@ void CKeyBoardWinCEDlg::OnBnClickedButtonSet()
 	ucInputStatusBuf[3] = atoi(cKeyValueBuf);
 }
 #endif
+
+void CKeyBoardWinCEDlg::OnBnClickedButtonSetIpaddress()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CSetIpAddressDlg SetIpAddressDlg;
+	if (!SetIpAddressDlg.DoModal())
+	{
+		MessageBox(_T("打开窗体失败！"), _T("信息提示"), MB_OK|MB_ICONERROR);
+	}
+	else
+	{
+		SetTimer(1, 1, NULL);
+		//SetTimer(2, 5, NULL);
+
+		//////////////////////////////////////////////////////////////////////////
+		// 开启Modbus 主站
+		//////////////////////////////////////////////////////////////////////////
+		StartModbusTcp();
+		//////////////////////////////////////////////////////////////////////////
+	}
+}
+
+void CKeyBoardWinCEDlg::OnBnClickedButtonOpenFtpTool()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	memset(&OpenFTPClient,0x00,sizeof(SHELLEXECUTEINFO));//清空内存的一定要加，不加会失败的。。。。。。
+	OpenFTPClient.lpFile=_T("\\NandFlash\\ARMV4_FTPClient.exe");
+	OpenFTPClient.lpVerb=L"open";
+	OpenFTPClient.cbSize = sizeof(SHELLEXECUTEINFO);
+	OpenFTPClient.fMask  = SEE_MASK_NOCLOSEPROCESS;
+	OpenFTPClient.hwnd   = NULL;
+	OpenFTPClient.nShow  = SW_SHOWNORMAL;
+
+	ShellExecuteEx(&OpenFTPClient);
+}

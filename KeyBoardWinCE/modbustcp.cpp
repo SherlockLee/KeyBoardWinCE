@@ -94,6 +94,25 @@ int StartModbusTcp()
     return iExitCode;
 }
 
+enum ModbusState GetModbusState()
+{
+	enum ModbusState ePollModbusState;
+
+	switch(eGetPollingThreadState())
+	{
+	case STOPPED:
+		ePollModbusState = MB_STOPPED;
+		break;
+	case RUNNING:
+		ePollModbusState = MB_RUNNING;
+		break;
+	case SHUTDOWN:
+		ePollModbusState = MB_SHUTDOWN;
+		break;
+	}
+	return ePollModbusState;
+}
+
 void StopModbusTcp()
 {
 	eSetPollingThreadState( SHUTDOWN );

@@ -1,6 +1,12 @@
 #ifndef _MODBUS_TCP_H
 #define _MODBUS_TCP_H
 
+enum ModbusState
+{
+	MB_STOPPED,
+	MB_RUNNING,
+	MB_SHUTDOWN
+};
 
 // 04 Read Input Registers
 #define REG_INPUT_START 1000
@@ -21,7 +27,7 @@
 
 int StartModbusTcp();
 void StopModbusTcp();
-
+enum ModbusState GetModbusState();
 
 
 

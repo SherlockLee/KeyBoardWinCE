@@ -71,13 +71,30 @@ IDR_MAINFRAME           ICON                    "res\\KeyBoardWinCE.ico"
 // Dialog
 //
 
-IDD_KEYBOARDWINCE_DIALOG DIALOG  0, 0, 131, 24
+IDD_KEYBOARDWINCE_DIALOG DIALOG  0, 0, 131, 40
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW | 0x80000000L
 CAPTION "KeyBoardWinCE"
 FONT 9, "MS Shell Dlg"
 BEGIN
-    PUSHBUTTON      "Min",IDC_BUTTON_MIN,40,4,50,14
+    PUSHBUTTON      "Min",IDC_BUTTON_MIN,1,4,60,14
+    PUSHBUTTON      "Set IP Address",IDC_BUTTON_SET_IPADDRESS,69,4,60,14
+    PUSHBUTTON      "Open FTP",IDC_BUTTON_OPEN_FTP_TOOL,35,21,60,14
+END
+
+IDD_SET_IPADDRESS_DIALOG DIALOG  0, 0, 186, 84
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "设置IP地址"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    DEFPUSHBUTTON   "确定",IDOK,34,64,50,14
+    PUSHBUTTON      "取消",IDCANCEL,101,64,50,14
+    LTEXT           "IP  地  址：",IDC_STATIC,7,10,48,8
+    LTEXT           "子网掩码：",IDC_STATIC,7,29,48,8
+    LTEXT           "默认网关：",IDC_STATIC,7,48,48,8
+    EDITTEXT        IDC_EDIT_IPADDRESS,54,6,116,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MASK,54,25,116,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_GATEWAY,54,44,116,14,ES_CENTER | ES_AUTOHSCROLL
 END
 
 
@@ -103,13 +120,13 @@ BEGIN
     BEGIN
         BLOCK "080403a8"
         BEGIN
-            VALUE "CompanyName", "TODO: <公司名>"
-            VALUE "FileDescription", "TODO: <文件说明>"
+            VALUE "CompanyName", "武汉迈信电气技术有限公司"
+            VALUE "FileDescription", "KeyBoardWinCE.exe"
             VALUE "FileVersion", "1.0.0.1"
             VALUE "InternalName", "KeyBoardWinCE.exe"
-            VALUE "LegalCopyright", "TODO: (C) <公司名>。保留所有权利。"
+            VALUE "LegalCopyright", "(C) <武汉迈信电气技术有限公司>。保留所有权利。"
             VALUE "OriginalFilename", "KeyBoardWinCE.exe"
-            VALUE "ProductName", "TODO: <产品名>"
+            VALUE "ProductName", "KeyBoardWinCE"
             VALUE "ProductVersion", "1.0.0.1"
         END
     END
@@ -133,7 +150,15 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 130
         TOPMARGIN, 7
-        BOTTOMMARGIN, 3
+        BOTTOMMARGIN, 19
+    END
+
+    IDD_SET_IPADDRESS_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 77
     END
 END
 #endif    // APSTUDIO_INVOKED

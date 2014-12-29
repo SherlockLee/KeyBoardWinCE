@@ -44,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Port&quot;;&quot;$(ProjectDir)modbus\tcp&quot;;&quot;$(ProjectDir)modbus\include&quot;;&quot;$(ProjectDir)modbus\functions&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Port&quot;;&quot;$(ProjectDir)modbus\tcp&quot;;&quot;$(ProjectDir)modbus\include&quot;;&quot;$(ProjectDir)modbus\functions&quot;;C:\WINCE600\PUBLIC\COMMON\OAK\INC"
 				PreprocessorDefinitions="_DEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;DEBUG;$(ARCHFAM);$(_ARCHFAM_);STANDARDSHELL_UI_MODEL"
 				MinimalRebuild="true"
 				RuntimeLibrary="1"
@@ -67,7 +67,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,6.00"
-				AdditionalDependencies="Ws2.lib"
+				AdditionalDependencies="Ws2.lib aygshell.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				StackReserveSize="65536"
@@ -93,7 +93,7 @@
 				ForceDirty="-1"
 				RemoteDirectory=""
 				RegisterOutput="0"
-				AdditionalFiles=""
+				AdditionalFiles="TeachBox1_2.dll|$(ProjectDir)|%CSIDL_PROGRAM_FILES%\KeyBoardWinCE|0"
 			/>
 			<DebuggerTool
 			/>
@@ -203,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SetIpAddressDlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -242,6 +246,10 @@
 			</File>
 			<File
 				RelativePath=".\Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SetIpAddressDlg.h"
 				>
 			</File>
 			<File
