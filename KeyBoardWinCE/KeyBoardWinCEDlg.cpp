@@ -80,7 +80,7 @@ BOOL CKeyBoardWinCEDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 	
 	// TODO: 在此添加额外的初始化代码
-	if(TECHBOX_NOERR!=TechBoxLibInit(this->m_hWnd,WM_TECHBOX_KEY_CHANGE,WM_TECHBOX_MPG))
+	if(TECHBOX_NOERR!=TechBoxLibInit(this->m_hWnd, WM_TECHBOX_KEY_CHANGE,WM_TECHBOX_MPG))
 	{
 		MessageBox(_T("TeachBox init error!"));
 	}
@@ -440,6 +440,7 @@ void CKeyBoardWinCEDlg::OnBnClickedButtonMin()
 void CKeyBoardWinCEDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	UCHAR ucBitValue = 0;
 	switch(nIDEvent)
 	{
 	case 1:
@@ -447,48 +448,58 @@ void CKeyBoardWinCEDlg::OnTimer(UINT_PTR nIDEvent)
 		KillTimer(1);
 		break;
 	case 2:
+		//////////////////////////////////////////////////////////////////////////
+		// 启动定时器，扫描值的变化，进行灯状态的调整
+		//////////////////////////////////////////////////////////////////////////
+		if ((ucInputCoilBuf[0]>>3 & 1) == 1)	// 对应的地址为103，其值为1	
+		{
+			techBox|=TEACHBOX_LED4;
+			ucBitValue = ucInputCoilBuf[0]>>3;
+		}
+		else
+		{
+			techBox&=~TEACHBOX_LED4;
+		}
+		SetOutputData1(techBox);
+
+		if ((ucInputCoilBuf[0]>>2 & 1) == 1)	// 对应的地址为102，其值为1
+		{
+			techBox|=TEACHBOX_LED3;
+		}
+		else 
+		{
+			techBox&=~TEACHBOX_LED3;
+		}
+		SetOutputData1(techBox);
+
+		if ((ucInputCoilBuf[0]>>1 & 1) == 1)	// 对应的地址为101，其值为1
+		{
+			techBox|=TEACHBOX_LED2;
+		}
+		else 
+		{
+			techBox&=~TEACHBOX_LED2;
+		}
+		SetOutputData1(techBox);
+
+		if ((ucInputCoilBuf[0]>>0 & 1) == 1)	// 对应的地址为100，其值为1
+		{
+			techBox|=TEACHBOX_LED1;			
+		}
+		else
+		{
+			techBox&=~TEACHBOX_LED1;
+		}
+		SetOutputData1(techBox);	
+		//////////////////////////////////////////////////////////////////////////
+		break;
+	case 3:
+		break;
+	case 4:
+		break;
+	case 5:
 		break;
 	}
-	//////////////////////////////////////////////////////////////////////////
-	// 启动定时器，扫描值的变化，进行灯状态的调整
-	//////////////////////////////////////////////////////////////////////////
-	if (ucInputCoilBuf[0] != 0)		// 对应的地址为100，其值为1
-	{
-		techBox|=TEACHBOX_LED1;
-	}
-	else
-	{
-		techBox&=~TEACHBOX_LED1;
-	}
-
-	if (ucInputCoilBuf[0]>>1 != 0)	// 对应的地址为101，其值为1
-	{
-		techBox|=TEACHBOX_LED2;
-	}
-	else 
-	{
-		techBox&=~TEACHBOX_LED2;
-	}
-
-	if (ucInputCoilBuf[0]>>2 != 0)	// 对应的地址为102，其值为1
-	{
-		techBox|=TEACHBOX_LED3;
-	}
-	else 
-	{
-		techBox&=~TEACHBOX_LED3;
-	}
-	
-	if (ucInputCoilBuf[0]>>3 != 0)	// 对应的地址为103，其值为1
-	{
-		techBox|=TEACHBOX_LED4;
-	}
-	else
-	{
-		techBox&=~TEACHBOX_LED4;
-	}
-	SetOutputData1(techBox);
-	//////////////////////////////////////////////////////////////////////////
 	CDialog::OnTimer(nIDEvent);
 }
 
@@ -515,7 +526,10 @@ void CKeyBoardWinCEDlg::OnBnClickedButtonSetIpaddress()
 	else
 	{
 		SetTimer(1, 1, NULL);
-		//SetTimer(2, 5, NULL);
+		SetTimer(2, 5, NULL);
+		SetTimer(3, 5, NULL);
+		SetTimer(4, 5, NULL);
+		SetTimer(5, 5, NULL);
 
 		//////////////////////////////////////////////////////////////////////////
 		// 开启Modbus 主站

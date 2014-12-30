@@ -24,7 +24,7 @@
 #define MB_TCP_READ_CYCLE   5		/* Time between checking for new data. */
 
 
-#define MB_TCP_DEBUG        1   /* Set to 1 for additional debug output. */
+#define MB_TCP_DEBUG        0   /* Set to 1 for additional debug output. */
 
 #define MB_TCP_BUF_SIZE     ( 256 + 7 ) /* Must hold a complete Modbus TCP frame. */
 
@@ -87,33 +87,51 @@ xMBTCPPortInit( USHORT usTCPPort )
     }
     if( i != EV_NEVENTS )
     {
-        vMBPortLog( MB_LOG_ERROR, _T( "TCP-POLL" ), _T( "can't create event objects: %s\r\n" ),
-                    WsaError2String( WSAGetLastError(  ) ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_ERROR, _T( "TCP-POLL" ), _T( "can't create event objects: %s\r\n" ),
+				WsaError2String( WSAGetLastError(  ) ) );
+		}
     }
     else if( ( xListenSocket = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP ) ) == INVALID_SOCKET )
     {
-        vMBPortLog( MB_LOG_ERROR, _T( "TCP-POLL" ), _T( "can't create socket: %s\r\n" ),
-                    WsaError2String( WSAGetLastError(  ) ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_ERROR, _T( "TCP-POLL" ), _T( "can't create socket: %s\r\n" ),
+				WsaError2String( WSAGetLastError(  ) ) );
+		}
     }
     else if( bind( xListenSocket, ( SOCKADDR * ) & xService, sizeof( xService ) ) == SOCKET_ERROR )
     {
-        vMBPortLog( MB_LOG_ERROR, _T( "TCP-POLL" ), _T( "can't bind on socket: %s\r\n" ),
-                    WsaError2String( WSAGetLastError(  ) ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_ERROR, _T( "TCP-POLL" ), _T( "can't bind on socket: %s\r\n" ),
+				WsaError2String( WSAGetLastError(  ) ) );
+		}
     }
     else if( listen( xListenSocket, 5 ) == SOCKET_ERROR )
     {
-        vMBPortLog( MB_LOG_ERROR, _T( "TCP-POLL" ), _T( "can't listen on socket: %s\r\n" ),
-                    WsaError2String( WSAGetLastError(  ) ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_ERROR, _T( "TCP-POLL" ), _T( "can't listen on socket: %s\r\n" ),
+				WsaError2String( WSAGetLastError(  ) ) );
+		}
     }
     else if( WSAEventSelect( xListenSocket, xEvents[EV_CONNECTION], FD_ACCEPT ) == SOCKET_ERROR )
     {
-        vMBPortLog( MB_LOG_ERROR, _T( "TCP-POLL" ), _T( "can't enable events on socket: %s\r\n" ),
-                    WsaError2String( WSAGetLastError(  ) ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_ERROR, _T( "TCP-POLL" ), _T( "can't enable events on socket: %s\r\n" ),
+				WsaError2String( WSAGetLastError(  ) ) );
+		}
     }
     else
     {
-        vMBPortLog( MB_LOG_INFO, _T( "TCP-POLL" ), _T( "Modbus TCP server listening on %S:%d\r\n" ),
-                    inet_ntoa( xService.sin_addr ), ntohs( xService.sin_port ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_INFO, _T( "TCP-POLL" ), _T( "Modbus TCP server listening on %S:%d\r\n" ),
+				inet_ntoa( xService.sin_addr ), ntohs( xService.sin_port ) );
+		}
         bOkay = TRUE;
     }
 
@@ -210,8 +228,12 @@ xMBPortTCPPool( void )
     /* Waiting for events failed. */
     else if( dwWaitResult == WSA_WAIT_FAILED )
     {
-        vMBPortLog( MB_LOG_ERROR, _T( "TCP-POLL" ), _T( "can't wait for network events: %s" ),
-                    WsaError2String( WSAGetLastError(  ) ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_ERROR, _T( "TCP-POLL" ), _T( "can't wait for network events: %s" ),
+				WsaError2String( WSAGetLastError(  ) ) );
+		}
+
         bOkay = FALSE;
     }
     /* A event occured on one of the sockets */
@@ -285,7 +307,10 @@ xMBPortTCPPool( void )
             }
             else
             {
-                vMBPortLog( MB_LOG_WARN, _T( "TCP-POLL" ), _T( "unknown EV_CLIENT event\r\n" ) );
+				if( MB_TCP_DEBUG )
+				{
+					vMBPortLog( MB_LOG_WARN, _T( "TCP-POLL" ), _T( "unknown EV_CLIENT event\r\n" ) );
+				}
             }
         }
         else
@@ -324,8 +349,11 @@ prvMBTCPGetFrame(  )
      */
     if( ( usTCPBufPos + usTCPFrameBytesLeft ) >= MB_TCP_BUF_SIZE )
     {
-        vMBPortLog( MB_LOG_WARN, _T( "MBTCP-RCV" ),
-                    _T( "Detected buffer overrun. Dropping client.\r\n" ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_WARN, _T( "MBTCP-RCV" ),
+				_T( "Detected buffer overrun. Dropping client.\r\n" ) );
+		}
         return FALSE;
     }
 
@@ -333,8 +361,11 @@ prvMBTCPGetFrame(  )
     switch ( iRes )
     {
     case SOCKET_ERROR:
-        vMBPortLog( MB_LOG_WARN, _T( "MBTCP-RCV" ), _T( "recv failed: %s\r\n" ),
-                    WsaError2String( WSAGetLastError(  ) ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_WARN, _T( "MBTCP-RCV" ), _T( "recv failed: %s\r\n" ),
+				WsaError2String( WSAGetLastError(  ) ) );
+		}
         if( WSAGetLastError(  ) != WSAEWOULDBLOCK )
         {
             bOkay = FALSE;
@@ -372,8 +403,11 @@ prvMBTCPGetFrame(  )
                 szFrameAsStr = prvMBTCPPortFrameToString( aucTCPBuf, usTCPBufPos );
                 if( szFrameAsStr != NULL )
                 {
-                    vMBPortLog( MB_LOG_DEBUG, _T( "MBTCP-RCV" ), _T( "Received: %s\r\n" ),
-                                szFrameAsStr );
+					if( MB_TCP_DEBUG )
+					{
+						vMBPortLog( MB_LOG_DEBUG, _T( "MBTCP-RCV" ), _T( "Received: %s\r\n" ),
+							szFrameAsStr );
+					}
                     free( szFrameAsStr );
                 }
             }
@@ -416,7 +450,10 @@ xMBTCPPortSendResponse( const UCHAR * pucMBTCPFrame, USHORT usTCPLength )
         szFrameAsStr = prvMBTCPPortFrameToString( aucTCPBuf, usTCPLength );
         if( szFrameAsStr != NULL )
         {
-            vMBPortLog( MB_LOG_DEBUG, _T( "MBTCP-SND" ), _T( "Snd: %s\r\n" ), szFrameAsStr );
+			if( MB_TCP_DEBUG )
+			{
+				vMBPortLog( MB_LOG_DEBUG, _T( "MBTCP-SND" ), _T( "Snd: %s\r\n" ), szFrameAsStr );
+			}
             free( szFrameAsStr );
         }
     }
@@ -461,35 +498,50 @@ prvvMBPortReleaseClient(  )
 
     if( prvMBTCPPortAddressToString( xClientSocket, szIPAddr, _countof( szIPAddr ) ) == TRUE )
     {
-        vMBPortLog( MB_LOG_INFO, _T( "MBTCP-CMGT" ), _T( "client %s disconnected.\r\n" ),
-                    szIPAddr );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_INFO, _T( "MBTCP-CMGT" ), _T( "client %s disconnected.\r\n" ),
+				szIPAddr );
+		}        
     }
     else
     {
-        vMBPortLog( MB_LOG_INFO, _T( "MBTCP-CMGT" ), _T( "unknown client disconnected.\r\n" ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_INFO, _T( "MBTCP-CMGT" ), _T( "unknown client disconnected.\r\n" ) );
+		}        
     }
 
     /* Disable event notification for this client socket. */
     if( WSAEventSelect( xClientSocket, xEvents[EV_CLIENT], 0 ) == SOCKET_ERROR )
     {
-        vMBPortLog( MB_LOG_ERROR, _T( "MBTCP-CMGT" ),
-                    _T( "can't disable events for disconnecting client socket: %s\r\n" ),
-                    WsaError2String( WSAGetLastError(  ) ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_ERROR, _T( "MBTCP-CMGT" ),
+				_T( "can't disable events for disconnecting client socket: %s\r\n" ),
+				WsaError2String( WSAGetLastError(  ) ) );
+		}        
     }
 
     /* Reset event object in case an event was still pending. */
     if( WSAResetEvent( xEvents[EV_CLIENT] ) == SOCKET_ERROR )
     {
-        vMBPortLog( MB_LOG_ERROR, _T( "MBTCP-CMGT" ),
-                    _T( "can't disable events for disconnecting client socket: %s\r\n" ),
-                    WsaError2String( WSAGetLastError(  ) ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_ERROR, _T( "MBTCP-CMGT" ),
+				_T( "can't disable events for disconnecting client socket: %s\r\n" ),
+				WsaError2String( WSAGetLastError(  ) ) );
+		}        
     }
 
     /* Disallow the sender side. This tells the other side that we have finished. */
     if( shutdown( xClientSocket, SD_SEND ) == SOCKET_ERROR )
     {
-        vMBPortLog( MB_LOG_ERROR, _T( "MBTCP-CMGT" ), _T( "shutdown failed: %s\r\n" ),
-                    WsaError2String( WSAGetLastError(  ) ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_ERROR, _T( "MBTCP-CMGT" ), _T( "shutdown failed: %s\r\n" ),
+				WsaError2String( WSAGetLastError(  ) ) );
+		}		
     }
 
     /* Read any unread data from the socket. Note that this is not the strictly 
@@ -514,8 +566,11 @@ prvbMBPortAcceptClient(  )
 
     if( xClientSocket != INVALID_SOCKET )
     {
-        vMBPortLog( MB_LOG_ERROR, _T( "MBTCP-CMGT" ),
-                    _T( "can't accept new client. all connections in use.\r\n" ) );
+		if( MB_TCP_DEBUG )
+		{
+			vMBPortLog( MB_LOG_ERROR, _T( "MBTCP-CMGT" ),
+				_T( "can't accept new client. all connections in use.\r\n" ) );
+		}		
         bOkay = FALSE;
     }
     else if( ( xNewSocket = accept( xListenSocket, NULL, NULL ) ) == INVALID_SOCKET )
@@ -537,12 +592,18 @@ prvbMBPortAcceptClient(  )
 
         if( prvMBTCPPortAddressToString( xClientSocket, szIPAddr, _countof( szIPAddr ) ) == TRUE )
         {
-            vMBPortLog( MB_LOG_INFO, _T( "MBTCP-CMGT" ), _T( "accepted new client %s.\r\n" ),
-                        szIPAddr );
+			if( MB_TCP_DEBUG )
+			{
+				vMBPortLog( MB_LOG_INFO, _T( "MBTCP-CMGT" ), _T( "accepted new client %s.\r\n" ),
+					szIPAddr );
+			}            
         }
         else
         {
-            vMBPortLog( MB_LOG_INFO, _T( "MBTCP-CMGT" ), _T( "accepted unknown client.\r\n" ) );
+			if( MB_TCP_DEBUG )
+			{
+				vMBPortLog( MB_LOG_INFO, _T( "MBTCP-CMGT" ), _T( "accepted unknown client.\r\n" ) );
+			}            
         }
         bOkay = TRUE;
 

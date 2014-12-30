@@ -135,6 +135,7 @@ WsaError2String( DWORD dwError )
     return szUserBuf;
 }
 
+
 void
 vMBPortLog( eMBPortLogLevel eLevel, const TCHAR * szModule, const TCHAR * szFmt, ... )
 {
