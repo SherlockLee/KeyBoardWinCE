@@ -527,9 +527,6 @@ void CKeyBoardWinCEDlg::OnBnClickedButtonSetIpaddress()
 	{
 		SetTimer(1, 1, NULL);
 		SetTimer(2, 5, NULL);
-		SetTimer(3, 5, NULL);
-		SetTimer(4, 5, NULL);
-		SetTimer(5, 5, NULL);
 
 		//////////////////////////////////////////////////////////////////////////
 		// ¿ªÆôModbus Ö÷Õ¾
