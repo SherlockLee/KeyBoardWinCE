@@ -80,6 +80,7 @@ BOOL CKeyBoardWinCEDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 	
 	// TODO: 在此添加额外的初始化代码
+	::SetWindowPos(this->m_hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_HIDEWINDOW|SWP_NOACTIVATE);
 	if(TECHBOX_NOERR!=TechBoxLibInit(this->m_hWnd, WM_TECHBOX_KEY_CHANGE,WM_TECHBOX_MPG))
 	{
 		MessageBox(_T("TeachBox init error!"));
@@ -89,6 +90,15 @@ BOOL CKeyBoardWinCEDlg::OnInitDialog()
 
 	}	
 	AddSystrayIcon();
+
+	SetTimer(2, 5, NULL);
+
+	//////////////////////////////////////////////////////////////////////////
+	// 开启Modbus 主站
+	//////////////////////////////////////////////////////////////////////////
+	StartModbusTcp();
+	//////////////////////////////////////////////////////////////////////////
+
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -118,235 +128,178 @@ LRESULT CKeyBoardWinCEDlg::OnTeachBoxKeyHandler(WPARAM w,LPARAM l)  //w:key1  l:
 		{
 		case TEACHBOX_KEY1:	// 修改130的值为1
 			ucInputStatusBuf[3] = 1<<6;
-			ucInputStatusBuf[7] = 0;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY2:	// 修改129的值为1
 			ucInputStatusBuf[3] = 1<<5;
-			ucInputStatusBuf[7] = 0;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY3:	// 修改128的值为1
 			ucInputStatusBuf[3] = 1<<4;
-			ucInputStatusBuf[7] = 0;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY4:	// 修改127的值为1
 			ucInputStatusBuf[3] = 1<<3;
-			ucInputStatusBuf[7] = 0;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY5:	// 修改126的值为1
 			ucInputStatusBuf[3] = 1<<2;
-			ucInputStatusBuf[7] = 0;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY6:	// 修改125的值为1
 			ucInputStatusBuf[3] = 1<<1;
-			ucInputStatusBuf[7] = 0;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY7:	// 修改124的值为1
 			ucInputStatusBuf[3] = 1;
-			ucInputStatusBuf[7] = 0;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY22:	// 修改123的值为1
-			ucInputStatusBuf[2] = 1<<7;
-			ucInputStatusBuf[7] = 0;
-			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[3] = 0;
-			ucInputStatusBuf[6] = 0;
+			if (((ucInputStatusBuf[2]>>7) & 1) == 0)
+			{
+				ucInputStatusBuf[2] |= 1<<7;
+			}
+			else
+			{
+				ucInputStatusBuf[2] ^= 1<<7;
+			}
 			break;
 		case TEACHBOX_KEY20:	// 修改122的值为1
-			ucInputStatusBuf[2] = 1<<6;
-			ucInputStatusBuf[7] = 0;
+			ucInputStatusBuf[2] |= 1<<6;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY18:	// 修改121的值为1
-			ucInputStatusBuf[2] = 1<<5;
-			ucInputStatusBuf[7] = 0;
+			ucInputStatusBuf[2] |= 1<<5;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY16:	// 修改120的值为1
-			 ucInputStatusBuf[2] = 1<<4;
-			 ucInputStatusBuf[7] = 0;
+			 ucInputStatusBuf[2] |= 1<<4;
 			 ucInputStatusBuf[0] = 0;
-			 ucInputStatusBuf[3] = 0;
 			 ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY14:	// 修改119的值为1
-			 ucInputStatusBuf[2] = 1<<3;
-			 ucInputStatusBuf[7] = 0;
+			 ucInputStatusBuf[2] |= 1<<3;
 			 ucInputStatusBuf[0] = 0;
-			 ucInputStatusBuf[3] = 0;
 			 ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY12:	// 修改118的值为1
-			 ucInputStatusBuf[2] = 1<<2;
-			 ucInputStatusBuf[7] = 0;
+			 ucInputStatusBuf[2] |= 1<<2;
 			 ucInputStatusBuf[0] = 0;
-			 ucInputStatusBuf[3] = 0;
 			 ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY10:	// 修改117的值为1
-			 ucInputStatusBuf[2] = 1<<1;
-			 ucInputStatusBuf[7] = 0;
+			 ucInputStatusBuf[2] |= 1<<1;
 			 ucInputStatusBuf[0] = 0;
-			 ucInputStatusBuf[3] = 0;
 			 ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY9:		// 修改116的值为1
-			 ucInputStatusBuf[2] = 1;
-			 ucInputStatusBuf[7] = 0;
+			 ucInputStatusBuf[2] |= 1;
 			 ucInputStatusBuf[0] = 0;
-			 ucInputStatusBuf[3] = 0;
 			 ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY21:	// 修改106的值为1
 			ucInputStatusBuf[0] = 1<<6;
-			ucInputStatusBuf[7] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY19:	// 修改105的值为1
 			ucInputStatusBuf[0] = 1<<5;
-			ucInputStatusBuf[7] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY17:	// 修改104的值为1
 			ucInputStatusBuf[0] = 1<<4;
-			ucInputStatusBuf[7] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY15:	// 修改103的值为1
 			ucInputStatusBuf[0] = 1<<3;
-			ucInputStatusBuf[7] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY13:	// 修改102的值为1
 			ucInputStatusBuf[0] = 1<<2;
-			ucInputStatusBuf[7] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY11:	// 修改101的值为1
 			ucInputStatusBuf[0] = 1<<1;
-			ucInputStatusBuf[7] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY8:	// 修改100的值为1
 			ucInputStatusBuf[0] = 1;
-			ucInputStatusBuf[7] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY31:	// 修改155的值为1
 			ucInputStatusBuf[6] = 1<<7;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
-			ucInputStatusBuf[7] = 0;
 			break;
 		case TEACHBOX_KEY30:	// 修改156的值为1
-			ucInputStatusBuf[7] = 1;
+			ucInputStatusBuf[7] |= 1;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY29:	// 修改157的值为1
-			ucInputStatusBuf[7] = 1<<1;
+			ucInputStatusBuf[7] |= 1<<1;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY28:		// 修改158的值为1
-			ucInputStatusBuf[7] = 1<<2;
+			ucInputStatusBuf[7] |= 1<<2;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY27:	// 修改159的值为1
-			ucInputStatusBuf[7] = 1<<3;
+			ucInputStatusBuf[7] |= 1<<3;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY26:	// 修改160的值为1
-			ucInputStatusBuf[7] = 1<<4;
+			ucInputStatusBuf[7] |= 1<<4;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY25:	// 修改161的值为1
-			ucInputStatusBuf[7] = 1<<5;
+			ucInputStatusBuf[7] |= 1<<5;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY24:	// 修改162的值为1
-			ucInputStatusBuf[7] = 1<<6;
+			if (((ucInputStatusBuf[7]>>6) & 1) == 0)
+			{
+				ucInputStatusBuf[7] |= 1<<6;
+			}
+			else
+			{
+				ucInputStatusBuf[7] ^= 1<<6;
+			}
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY23:	// 修改163的值为1
-			ucInputStatusBuf[7] = 1<<7;
+			ucInputStatusBuf[7] |= 1<<7;
 			ucInputStatusBuf[0] = 0;
-			ucInputStatusBuf[2] = 0;
-			ucInputStatusBuf[3] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
 		}
-		//MessageBox(_T("LED3 on"));
 	}
 	else
 	{
 		techBox&=~TEACHBOX_BUZZER;
-		//MessageBox(_T("LED3 off"));
 	}
 	SetOutputData1(techBox) ;
 
 	UpdateData(FALSE);
 	if (m_key == 0x0000)
 	{
-
+		ucInputStatusBuf[0] = 0;
+		ucInputStatusBuf[2] &= 1<<7;
+		ucInputStatusBuf[6] = 0;
+		ucInputStatusBuf[7] &= 1<<6;
 	}
 
 	return 0; 
@@ -433,8 +386,8 @@ void CKeyBoardWinCEDlg::OnBnClickedButtonMin()
 	}
 	this->ShowWindow(SW_MINIMIZE);
 #endif	
-	::SetWindowPos(this->m_hWnd, HWND_NOTOPMOST, 0, 0, 210, 80, SWP_HIDEWINDOW|SWP_NOACTIVATE);
-	//::SetWindowPos(this->m_hWnd, HWND_NOTOPMOST, 0, 0, 500, 500, SWP_HIDEWINDOW|SWP_NOACTIVATE);
+	/*::SetWindowPos(this->m_hWnd, HWND_NOTOPMOST, 0, 0, 210, 80, SWP_HIDEWINDOW|SWP_NOACTIVATE);*/
+	::SetWindowPos(this->m_hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_HIDEWINDOW|SWP_NOACTIVATE);
 }
 
 void CKeyBoardWinCEDlg::OnTimer(UINT_PTR nIDEvent)
@@ -444,7 +397,7 @@ void CKeyBoardWinCEDlg::OnTimer(UINT_PTR nIDEvent)
 	switch(nIDEvent)
 	{
 	case 1:
-		::SetWindowPos(this->m_hWnd, HWND_NOTOPMOST, 0, 0, 210, 80, SWP_HIDEWINDOW|SWP_NOACTIVATE);
+		/*::SetWindowPos(this->m_hWnd, HWND_NOTOPMOST, 0, 0, 210, 80, SWP_HIDEWINDOW|SWP_NOACTIVATE);*/
 		KillTimer(1);
 		break;
 	case 2:
@@ -493,12 +446,6 @@ void CKeyBoardWinCEDlg::OnTimer(UINT_PTR nIDEvent)
 		SetOutputData1(techBox);	
 		//////////////////////////////////////////////////////////////////////////
 		break;
-	case 3:
-		break;
-	case 4:
-		break;
-	case 5:
-		break;
 	}
 	CDialog::OnTimer(nIDEvent);
 }
@@ -525,7 +472,6 @@ void CKeyBoardWinCEDlg::OnBnClickedButtonSetIpaddress()
 	}
 	else
 	{
-		SetTimer(1, 1, NULL);
 		SetTimer(2, 5, NULL);
 
 		//////////////////////////////////////////////////////////////////////////
@@ -539,7 +485,7 @@ void CKeyBoardWinCEDlg::OnBnClickedButtonSetIpaddress()
 void CKeyBoardWinCEDlg::OnBnClickedButtonOpenFtpTool()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	memset(&OpenFTPClient,0x00,sizeof(SHELLEXECUTEINFO));//清空内存的一定要加，不加会失败的。。。。。。
+	memset(&OpenFTPClient,0x00,sizeof(SHELLEXECUTEINFO));//清空内存的一定要加
 	OpenFTPClient.lpFile=_T("\\NandFlash\\ARMV4_FTPClient.exe");
 	OpenFTPClient.lpVerb=L"open";
 	OpenFTPClient.cbSize = sizeof(SHELLEXECUTEINFO);
