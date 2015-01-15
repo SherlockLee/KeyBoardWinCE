@@ -269,14 +269,7 @@ LRESULT CKeyBoardWinCEDlg::OnTeachBoxKeyHandler(WPARAM w,LPARAM l)  //w:key1  l:
 			ucInputStatusBuf[6] = 0;
 			break;
 		case TEACHBOX_KEY24:	// 修改162的值为1
-			if (((ucInputStatusBuf[7]>>6) & 1) == 0)
-			{
-				ucInputStatusBuf[7] |= 1<<6;
-			}
-			else
-			{
-				ucInputStatusBuf[7] ^= 1<<6;
-			}
+			ucInputStatusBuf[7] |= 1<<6;
 			ucInputStatusBuf[0] = 0;
 			ucInputStatusBuf[6] = 0;
 			break;
@@ -299,7 +292,7 @@ LRESULT CKeyBoardWinCEDlg::OnTeachBoxKeyHandler(WPARAM w,LPARAM l)  //w:key1  l:
 		ucInputStatusBuf[0] = 0;
 		ucInputStatusBuf[2] &= 1<<7;
 		ucInputStatusBuf[6] = 0;
-		ucInputStatusBuf[7] &= 1<<6;
+		ucInputStatusBuf[7] = 0;
 	}
 
 	return 0; 
